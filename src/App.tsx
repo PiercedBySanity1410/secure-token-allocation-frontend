@@ -357,13 +357,25 @@ export const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-6 border-t border-gray-800 text-center text-xs text-gray-400">
-        <div className="container mx-auto px-4">
-          <p className="font-bold text-gray-300 mb-1">
+        <div className="container mx-auto px-4 space-y-2">
+          <p className="font-bold text-gray-300">
             Secure Token Allocation System &bull; Cryptographic Queue Engine
           </p>
           <p className="text-[11px] text-gray-500">
             © 2026 Secure Token Allocation &bull; All Rights Reserved
           </p>
+          <div className="pt-2 text-xs text-gray-400 flex flex-wrap items-center justify-center gap-1.5 font-medium">
+            <span>Made with <span className="text-red-500">♥</span> by <strong className="text-gray-200 font-semibold">Gurjot Singh</strong></span>
+            <span>&bull;</span>
+            <a
+              href="https://www.gurjot.codes"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 hover:underline transition-colors"
+            >
+              www.gurjot.codes
+            </a>
+          </div>
         </div>
       </footer>
     </div>

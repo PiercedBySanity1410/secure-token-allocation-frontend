@@ -197,7 +197,19 @@ export const TappyLineLanding: React.FC<TappyLineLandingProps> = ({ onCreateQueu
 
       {/* Footer */}
       <footer className="bg-slate-950 border-t border-slate-800 py-8 text-center text-xs text-slate-500">
-        <p>© 2026 TokenFlow Engine. Cryptographically secured and privacy protected.</p>
+        <p className="mb-2">© 2026 TokenFlow Engine. Cryptographically secured and privacy protected.</p>
+        <div className="text-xs text-slate-400 flex flex-wrap items-center justify-center gap-1.5 font-medium">
+          <span>Made with <span className="text-red-500">♥</span> by <strong className="text-slate-300 font-semibold">Gurjot Singh</strong></span>
+          <span>&bull;</span>
+          <a
+            href="https://www.gurjot.codes"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-cyan-400 hover:text-cyan-300 hover:underline transition-colors"
+          >
+            www.gurjot.codes
+          </a>
+        </div>
       </footer>
     </div>
   );
