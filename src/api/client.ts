@@ -1,6 +1,14 @@
 import { Allocation, RequestItem, DashboardStats, AuditLogItem } from '../types';
 
-export const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '/api';
+let rawApiBase = (import.meta as any).env?.VITE_API_BASE_URL || '/api';
+
+// If deployed on HTTPS (e.g. Vercel) and VITE_API_BASE_URL is set to an insecure http:// URL,
+// fallback to relative '/api' so Vercel rewrite proxy handles it without Mixed Content errors.
+if (typeof window !== 'undefined' && window.location.protocol === 'https:' && rawApiBase.startsWith('http://')) {
+  rawApiBase = '/api';
+}
+
+export const API_BASE = rawApiBase;
 
 export function generateIdempotencyKey(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {

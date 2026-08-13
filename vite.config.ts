@@ -6,23 +6,34 @@ declare const process: { cwd: () => string; env: Record<string, string | undefin
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, typeof process !== 'undefined' && process.cwd ? process.cwd() : '', '');
-  const backendTarget = env.VITE_BACKEND_URL || env.BACKEND_URL || 'http://localhost:8080';
+  const backendTarget = env.VITE_BACKEND_URL || env.BACKEND_URL || 'http://ec2-3-231-204-13.compute-1.amazonaws.com:8080';
   const wsTarget = backendTarget.replace(/^http/, 'ws');
+
+  const proxyOptions = {
+    '/api': {
+      target: backendTarget,
+      changeOrigin: true,
+      secure: false,
+    },
+    '/ws': {
+      target: wsTarget,
+      ws: true,
+      changeOrigin: true,
+      secure: false,
+    },
+  };
 
   return {
     plugins: [react()],
     server: {
       port: 5173,
-      proxy: {
-        '/api': {
-          target: backendTarget,
-          changeOrigin: true,
-        },
-        '/ws': {
-          target: wsTarget,
-          ws: true,
-        },
-      },
+      host: true,
+      proxy: proxyOptions,
+    },
+    preview: {
+      port: 4173,
+      host: true,
+      proxy: proxyOptions,
     },
   };
 });
