@@ -1,0 +1,246 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ═══════════════════════════════════════════
+   TOKENFLOW #111 DARK THEME DESIGN SYSTEM
+   ═══════════════════════════════════════════ */
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --theme-seed: #111111;
+  --theme-card: #1a1a1a;
+  --theme-card-hover: #222222;
+  --theme-border: #2e2e2e;
+  --theme-accent: #6366f1;
+  --theme-accent-cyan: #0ea5e9;
+  --theme-accent-gradient: linear-gradient(to right, #6366f1, #0ea5e9);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: #111111;
+  background: linear-gradient(135deg, #111111 0%, #1a1a1a 50%, #111111 100%);
+  color: #f3f4f6;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════
+   TOKENFLOW COMPONENT CLASSES (#111 SEED)
+   ═══════════════════════════════════════════ */
+
+/* Card */
+.card {
+  background-color: #1a1a1a;
+  border-radius: 1rem;
+  border: 1px solid #2e2e2e;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  color: #f3f4f6;
+}
+
+/* Primary Button */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(to right, #6366f1, #0ea5e9);
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.35), 0 4px 6px -4px rgba(14, 165, 233, 0.25);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.5), 0 8px 10px -6px rgba(14, 165, 233, 0.4);
+  background: linear-gradient(to right, #818cf8, #38bdf8);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* Standalone Input */
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 2px solid #2e2e2e;
+  padding: 0.75rem 1rem;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: #ffffff;
+  background-color: #141414;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input::placeholder {
+  color: #6b7280;
+}
+
+.input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
+/* Input Group with Icon on Left */
+.input-icon-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 2px solid #2e2e2e;
+  background-color: #141414;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.input-icon-group:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
+.input-icon-group .icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 0.875rem;
+  padding-right: 0.35rem;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.input-icon-group input {
+  flex: 1;
+  width: 100%;
+  padding: 0.75rem 0.875rem 0.75rem 0.25rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+.input-icon-group input::placeholder {
+  color: #6b7280;
+}
+
+/* Queue Badge */
+.queue-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: linear-gradient(to right, #6366f1, #0ea5e9);
+  padding: 0.5rem 1rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+}
+
+/* Ticket Card Styling */
+.ticket-card {
+  position: relative;
+  background: #1a1a1a;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+
+/* Left & Right Perforated Ticket Notches */
+.ticket-notch-container {
+  position: relative;
+  background: #1a1a1a;
+}
+
+.ticket-notch-container::before,
+.ticket-notch-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  background: #111111;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.ticket-notch-container::before {
+  left: -14px;
+}
+
+.ticket-notch-container::after {
+  right: -14px;
+}
+
+.ticket-perforation {
+  border-bottom: 2px dashed #222222;
+  margin: 0.5rem 0;
+}
+
+/* Modal Backdrop Overlay Fix */
+.modal-overlay-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 1rem !important;
+  background-color: rgba(17, 17, 17, 0.88) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow-y: auto !important;
+}
+
+/* Animations */
+@keyframes slideUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+  50% { box-shadow: 0 0 40px rgba(14, 165, 233, 0.8); }
+}
+
+@keyframes notificationPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+.animate-pop {
+  animation: notificationPop 0.35s ease-out;
+}
