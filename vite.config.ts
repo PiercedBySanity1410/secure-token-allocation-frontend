@@ -6,7 +6,7 @@ declare const process: { cwd: () => string; env: Record<string, string | undefin
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, typeof process !== 'undefined' && process.cwd ? process.cwd() : '', '');
-  const backendTarget = env.VITE_BACKEND_URL || env.BACKEND_URL || 'http://ec2-3-231-204-13.compute-1.amazonaws.com:8080';
+  const backendTarget = env.VITE_BACKEND_URL || env.BACKEND_URL || 'http://ec2-100-61-173-22.compute-1.amazonaws.com:8080';
   const wsTarget = backendTarget.replace(/^http/, 'ws');
 
   const proxyOptions = {
