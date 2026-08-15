@@ -651,11 +651,20 @@ export const AdminDashboard: React.FC<Props> = ({ adminUsername, adminRole = 'SU
                       }
                       if (!searchQuery.trim()) return true;
                       const q = searchQuery.toLowerCase().trim();
-                      const name = (r.form_data?.name || r.form_data?.customerName || '').toString().toLowerCase();
-                      const phone = (r.form_data?.phone || r.form_data?.phoneNumber || '').toString().toLowerCase();
-                      const id = r.id.toLowerCase();
-                      const token = (r.assigned_token || '').toString();
-                      return name.includes(q) || phone.includes(q) || id.includes(q) || token.includes(q);
+                      const idMatch = r.id.toLowerCase().includes(q);
+                      const tokenMatch = (r.assigned_token || '').toString().includes(q);
+                      const allocMatch = (r.allocation_name || '').toLowerCase().includes(q);
+                      const statusMatch = (r.status || '').toLowerCase().includes(q);
+                      const userSessionMatch = (r.user_session_id || '').toLowerCase().includes(q);
+
+                      const formDataMatch = r.form_data ? Object.entries(r.form_data).some(([key, val]) => {
+                        if (key.toLowerCase().includes(q)) return true;
+                        if (val === null || val === undefined) return false;
+                        if (typeof val === 'object') return JSON.stringify(val).toLowerCase().includes(q);
+                        return String(val).toLowerCase().includes(q);
+                      }) : false;
+
+                      return idMatch || tokenMatch || allocMatch || statusMatch || userSessionMatch || formDataMatch;
                     });
 
                     const sorted = [...filtered].sort((a, b) => {
@@ -763,12 +772,40 @@ export const AdminDashboard: React.FC<Props> = ({ adminUsername, adminRole = 'SU
                               </>
                             )}
                             {r.status === 'ACCEPTED' && (
+                              <>
+                                <button
+                                  onClick={() => handleServe(r.id)}
+                                  className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg font-extrabold text-[11px] shadow-sm flex items-center gap-1"
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  <span>Mark Served 🎯</span>
+                                </button>
+                                <button
+                                  onClick={() => handleHold(r.id)}
+                                  className="bg-[#222222] hover:bg-[#2a2a2a] text-amber-400 border border-[#333333] px-2 py-1 rounded-lg font-bold text-[11px]"
+                                >
+                                  Hold
+                                </button>
+                              </>
+                            )}
+                            {r.status === 'HOLD' && (
                               <button
-                                onClick={() => handleServe(r.id)}
-                                className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg font-extrabold text-[11px] shadow-sm flex items-center gap-1"
+                                onClick={() => handleAccept(r.id)}
+                                className="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 rounded-lg font-bold text-[11px] flex items-center gap-1 shadow-2xs"
+                                title="Resume token and set status back to Serving (ACCEPTED)"
                               >
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                <span>Mark Served 🎯</span>
+                                <RefreshCw className="w-3.5 h-3.5" />
+                                <span>Resume Serving</span>
+                              </button>
+                            )}
+                            {r.status === 'SERVED' && (
+                              <button
+                                onClick={() => handleAccept(r.id)}
+                                className="bg-indigo-600/80 hover:bg-indigo-500 text-white px-2.5 py-1 rounded-lg font-bold text-[11px] flex items-center gap-1 shadow-2xs"
+                                title="Re-open ticket and return state to Serving (ACCEPTED)"
+                              >
+                                <RefreshCw className="w-3.5 h-3.5" />
+                                <span>Re-open (Serving)</span>
                               </button>
                             )}
                             <button

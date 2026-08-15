@@ -47,15 +47,37 @@ export async function getAllTokensFromIndexedDB(): Promise<CachedToken[]> {
   return await db.getAll('tokens');
 }
 
-export async function getLatestTokenFromIndexedDB(): Promise<CachedToken | undefined> {
+export const getLatestTokenFromIndexedDB = getActiveTokenForAllocation;
+
+export async function getActiveTokenForAllocation(allocationId?: string): Promise<CachedToken | undefined> {
   const all = await getAllTokensFromIndexedDB();
   if (all.length === 0) return undefined;
+  
   // Sort descending by syncTimestamp
   all.sort((a, b) => b.syncTimestamp - a.syncTimestamp);
-  return all[0];
+  
+  const activeStatuses = ['PENDING', 'ACCEPTED', 'HOLD'];
+  if (allocationId) {
+    const matched = all.find((t) => t.allocationId === allocationId && activeStatuses.includes(t.status));
+    if (matched) return matched;
+  }
+  return all.find((t) => activeStatuses.includes(t.status)) || all[0];
+}
+
+export async function updateTokenStatusInIndexedDB(requestId: string, status: string, tokenNumber?: number): Promise<void> {
+  const existing = await getTokenFromIndexedDB(requestId);
+  if (existing) {
+    await saveTokenToIndexedDB({
+      ...existing,
+      status: status as any,
+      tokenNumber: tokenNumber !== undefined ? tokenNumber : existing.tokenNumber,
+      syncTimestamp: Date.now(),
+    });
+  }
 }
 
 export async function removeTokenFromIndexedDB(requestId: string): Promise<void> {
   const db = await getDB();
   await db.delete('tokens', requestId);
 }
+

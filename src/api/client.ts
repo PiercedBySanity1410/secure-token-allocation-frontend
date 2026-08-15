@@ -1,4 +1,5 @@
 import { Allocation, RequestItem, DashboardStats, AuditLogItem } from '../types';
+import * as XLSX from 'xlsx';
 
 let rawApiBase = (import.meta as any).env?.VITE_API_BASE_URL || '/api';
 
@@ -18,11 +19,13 @@ export function generateIdempotencyKey(): string {
 }
 
 export function getUserSessionID(): string {
-  let sessionID = sessionStorage.getItem('user_session_id');
+  let sessionID = (typeof localStorage !== 'undefined' && localStorage.getItem('user_session_id')) ||
+                  (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('user_session_id'));
   if (!sessionID) {
     sessionID = generateIdempotencyKey();
-    sessionStorage.setItem('user_session_id', sessionID);
   }
+  if (typeof localStorage !== 'undefined') localStorage.setItem('user_session_id', sessionID);
+  if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('user_session_id', sessionID);
   return sessionID;
 }
 
@@ -303,18 +306,29 @@ export async function updateAllocationStatus(id: string, status: string): Promis
   if (alloc) alloc.status = status as any;
 }
 
-export async function getAdminRequests(allocationId?: string, status?: string): Promise<RequestItem[]> {
+export async function getAdminRequests(allocationId?: string, status?: string, search?: string): Promise<RequestItem[]> {
   return safeFetch(
     () => {
       const params = new URLSearchParams();
       if (allocationId) params.append('allocation_id', allocationId);
       if (status) params.append('status', status);
+      if (search) params.append('search', search);
       return fetch(`${API_BASE}/admin/requests?${params.toString()}`, { headers: getAdminHeaders(), credentials: 'include' });
     },
     () => {
       let filtered = [...fallbackRequests];
       if (allocationId) filtered = filtered.filter((r) => r.allocation_id === allocationId);
       if (status) filtered = filtered.filter((r) => r.status === status);
+      if (search && search.trim()) {
+        const q = search.toLowerCase().trim();
+        filtered = filtered.filter((r) => {
+          const idMatch = r.id.toLowerCase().includes(q);
+          const tokenMatch = (r.assigned_token || '').toString().includes(q);
+          const allocMatch = (r.allocation_name || '').toLowerCase().includes(q);
+          const formDataMatch = r.form_data ? Object.values(r.form_data).some((v) => String(v || '').toLowerCase().includes(q)) : false;
+          return idMatch || tokenMatch || allocMatch || formDataMatch;
+        });
+      }
       return filtered;
     }
   );
@@ -409,16 +423,36 @@ export async function exportSession(id: string): Promise<void> {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `session_${id}_export.csv`;
+      a.download = `session_${id}_export.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       return;
     }
   } catch (e) {
-    // Ignore error
+    // Ignore network error and fall back to XLSX generation below
   }
-  alert('Export triggered (demo mode)');
+
+  // Standalone / Offline XLSX fallback using SheetJS
+  try {
+    const sessionReqs = fallbackRequests.filter((r) => r.allocation_id === id);
+    const dataRows = sessionReqs.map((r) => ({
+      'Request ID': r.id,
+      'Assigned Token Number': r.assigned_token ? `#${r.assigned_token}` : '',
+      'Queue Status': r.status,
+      'Session Name': r.allocation_name,
+      Date: r.date,
+      'Submitted At': r.submitted_at,
+      'User Session Device ID': r.user_session_id,
+      ...r.form_data,
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(dataRows.length > 0 ? dataRows : [{ Note: 'No requests for this session' }]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Session Requests');
+    XLSX.writeFile(workbook, `session_${id}_export.xlsx`);
+  } catch (e) {
+    console.error('Offline XLSX export failed', e);
+  }
 }
 
 export async function holdRequest(requestId: string): Promise<RequestItem> {

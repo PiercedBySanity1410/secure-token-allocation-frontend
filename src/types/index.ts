@@ -33,7 +33,7 @@ export interface RequestItem {
   date: string;
   user_session_id: string;
   form_data: Record<string, any>;
-  status: 'PENDING' | 'ACCEPTED' | 'SERVED' | 'REJECTED' | 'CANCELLED' | 'EXPIRED';
+  status: 'PENDING' | 'ACCEPTED' | 'SERVED' | 'REJECTED' | 'CANCELLED' | 'EXPIRED' | 'HOLD';
   assigned_token?: number;
   queue_position: number;
   people_ahead?: number;
@@ -72,7 +72,7 @@ export interface CachedToken {
   allocationName: string;
   tokenNumber?: number;
   date: string;
-  status: 'PENDING' | 'ACCEPTED' | 'SERVED' | 'REJECTED' | 'CANCELLED' | 'EXPIRED';
+  status: 'PENDING' | 'ACCEPTED' | 'SERVED' | 'REJECTED' | 'CANCELLED' | 'EXPIRED' | 'HOLD';
   issuedAt?: string;
   submittedAt: string;
   syncTimestamp: number;

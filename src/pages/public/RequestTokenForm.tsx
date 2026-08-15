@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Allocation, RequestItem, FormField, CachedToken } from '../../types';
-import { submitTokenRequest } from '../../api/client';
-import { saveTokenToIndexedDB } from '../../db/indexedDB';
+import { submitTokenRequest, getRequestStatus } from '../../api/client';
+import { saveTokenToIndexedDB, getActiveTokenForAllocation, removeTokenFromIndexedDB } from '../../db/indexedDB';
 import { ArrowLeft, ArrowRight, ShieldCheck, Ticket, User, Phone, Mail, Hash, AlertCircle, Lock } from 'lucide-react';
 
 interface RequestTokenFormProps {
@@ -19,7 +19,41 @@ export const RequestTokenForm: React.FC<RequestTokenFormProps> = ({
   onRequestSubmitted,
   onViewMyToken,
 }) => {
-  const hasActiveTicket = cachedToken && (cachedToken.status === 'PENDING' || cachedToken.status === 'ACCEPTED');
+  const [offlineToken, setOfflineToken] = useState<CachedToken | null>(cachedToken);
+
+  useEffect(() => {
+    let isMounted = true;
+    getActiveTokenForAllocation(allocation.id).then(async (tok) => {
+      if (!isMounted) return;
+      if (tok && ['PENDING', 'ACCEPTED', 'HOLD'].includes(tok.status)) {
+        setOfflineToken(tok);
+        if (navigator.onLine) {
+          try {
+            const liveReq = await getRequestStatus(tok.requestId);
+            if (liveReq && isMounted) {
+              const updated: CachedToken = {
+                ...tok,
+                status: liveReq.status,
+                tokenNumber: liveReq.assigned_token,
+                syncTimestamp: Date.now(),
+              };
+              await saveTokenToIndexedDB(updated).catch(() => null);
+              setOfflineToken(updated);
+            }
+          } catch (err: any) {
+            if (err?.message?.includes('not found') || err?.message?.includes('404')) {
+              await removeTokenFromIndexedDB(tok.requestId).catch(() => null);
+              if (isMounted) setOfflineToken(null);
+            }
+          }
+        }
+      }
+    });
+    return () => { isMounted = false; };
+  }, [allocation.id]);
+
+  const activeTicket = offlineToken || cachedToken;
+  const hasActiveTicket = activeTicket && ['PENDING', 'ACCEPTED', 'HOLD'].includes(activeTicket.status);
   const fields: FormField[] = allocation.form_fields && allocation.form_fields.length > 0
     ? allocation.form_fields
     : [
@@ -92,6 +126,14 @@ export const RequestTokenForm: React.FC<RequestTokenFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
+
+    // Safety check against offline/online active ticket before submit
+    const existingActive = await getActiveTokenForAllocation(allocation.id);
+    if (existingActive && ['PENDING', 'ACCEPTED', 'HOLD'].includes(existingActive.status)) {
+      setOfflineToken(existingActive);
+      setError(`You already have an active ticket (#${existingActive.tokenNumber || 'Active'}) for ${allocation.name}. Form resubmission is blocked.`);
+      return;
+    }
 
     // Validate all fields
     let hasErr = false;
